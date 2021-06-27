@@ -210,7 +210,7 @@ class _NIDFrontBackCaptureState extends State<NIDFrontBackCapture> {
   }
 
   //onScreen error dialog
-  fetchDataErrorDialog(String title, String msg) {
+  fetchDataErrorDialog(String title, String msg, {Function() onPressed}) {
     showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -225,10 +225,11 @@ class _NIDFrontBackCaptureState extends State<NIDFrontBackCapture> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              readBarcode();
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
+            child: Text('SKIP'),
+          ),
+          TextButton(
+            onPressed: onPressed,
             child: Text('TRY AGAIN'),
           ),
         ],
@@ -236,13 +237,13 @@ class _NIDFrontBackCaptureState extends State<NIDFrontBackCapture> {
     );
   }
 
-  errorDialog() {
+  errorDialog(String title) {
     showDialog(
         context: context,
         builder: (context) {
           return SimpleDialog(
             title: Text(
-              'Please submit nid both side image properly',
+              title,
               style: TextStyle(fontSize: 18),
             ),
             children: <Widget>[
@@ -288,7 +289,7 @@ class _NIDFrontBackCaptureState extends State<NIDFrontBackCapture> {
 
         ],
       ),
-      body: ListView(
+      /*body: ListView(
         children: [
           Container(
             margin: const EdgeInsets.symmetric(
@@ -434,6 +435,145 @@ class _NIDFrontBackCaptureState extends State<NIDFrontBackCapture> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 15, vertical: 12),
+                  child: Text(
+                    'Submit',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),*/
+      body: ListView(
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            height: MediaQuery.of(context).size.height * 0.3,
+            width: MediaQuery.of(context).size.width * 0.95,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                nidFrontImage == null
+                    ? ElevatedButton(
+                  onPressed: textRecognition,
+                  child: const Text("Capture NID Front side Image"),
+                )
+                    : Container(
+                  height: MediaQuery.of(context).size.height * 0.295,
+                  width: MediaQuery.of(context).size.width * 0.95,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: Image.file(
+                      File(nidFrontImage?.path),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            height: MediaQuery.of(context).size.height * 0.3,
+            width: MediaQuery.of(context).size.width * 0.95,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                nidBackImage == null
+                    ? ElevatedButton(
+                  onPressed: readBarcode,
+                  child: const Text("Capture NID Back side Image"),
+                )
+                    : Container(
+                  height: MediaQuery.of(context).size.height * 0.295,
+                  width: MediaQuery.of(context).size.width * 0.95,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: Image.file(
+                      File(nidBackImage?.path),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.grey,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    if (_isInternet) {
+                      if (nidFrontImage == null) {
+                        errorDialog(
+                            'Please submit nid Front side image properly');
+                      } else if (nidBackImage == null) {
+                        errorDialog('Please submit nid Back side image properly');
+                      } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  EKycCustomerNidConfirmation(
+                                    frontImg: nidFrontImage?.path,
+                                    backImg: nidBackImage?.path,
+                                    nid: '6427886723',
+                                  ),
+                            ),
+                          );
+                      }
+                    } else {
+                      connectivityChecker();
+                    }
+                  } catch (e) {
+                    setState(() {
+                      connectivityChecker();
+                    });
+                    print(e.toString());
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                   child: Text(
                     'Submit',
                     style: TextStyle(fontSize: 18),
